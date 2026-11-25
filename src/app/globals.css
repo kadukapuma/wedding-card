@@ -1,26 +1,58 @@
 @import "tailwindcss";
 
+@theme {
+  --color-gold: #C5A05A;
+  --color-gold-light: #E8D399;
+  --color-gold-bright: #D4AF37;
+  --color-gold-dark: #8F6F29;
+  --color-maroon: #7B263A;
+  --color-maroon-dark: #581827;
+  --color-cream: #FFF9EF;
+  --color-cream-card: #FDF4E3;
+  --color-text-brown: #49382D;
+  --color-dark-brown: #38251F;
+
+  --font-cinzel: var(--font-cinzel), serif;
+  --font-script: var(--font-great-vibes), cursive;
+  --font-cormorant: var(--font-cormorant), serif;
+  --font-sinhala: var(--font-sinhala), serif;
+}
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --background: #FFF9EF;
+  --foreground: #49382D;
 }
 
 body {
-  background: var(--background);
+  background-color: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-cormorant), serif;
+  overflow-x: hidden;
+}
+
+/* Custom traditional Sri Lankan gold foil and decorative gradient utilities */
+.gold-gradient-text {
+  background: linear-gradient(135deg, #8F6F29 0%, #D4AF37 35%, #FFF0BE 55%, #C5A05A 80%, #7A5B1C 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.gold-border {
+  border-image: linear-gradient(135deg, #8F6F29, #D4AF37, #C5A05A, #7A5B1C) 1;
+}
+
+.gold-box-shadow {
+  box-shadow: 0 10px 30px -5px rgba(197, 160, 90, 0.25), 0 0 15px rgba(212, 175, 55, 0.15);
+}
+
+.maroon-box-shadow {
+  box-shadow: 0 12px 36px -6px rgba(123, 38, 58, 0.35);
+}
+
+/* Traditional Sri Lankan pattern background */
+.bg-traditional-pattern {
+  background-color: #FFF9EF;
+  background-image: radial-gradient(#C5A05A 0.75px, transparent 0.75px), radial-gradient(#7B263A 0.75px, #FFF9EF 0.75px);
+  background-size: 30px 30px;
+  background-position: 0 0, 15px 15px;
 }
