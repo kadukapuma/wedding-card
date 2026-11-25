@@ -11,11 +11,14 @@
   --color-cream-card: #FDF4E3;
   --color-text-brown: #49382D;
   --color-dark-brown: #38251F;
+}
 
-  --font-cinzel: var(--font-cinzel), serif;
-  --font-script: var(--font-great-vibes), cursive;
-  --font-cormorant: var(--font-cormorant), serif;
-  --font-sinhala: var(--font-sinhala), serif;
+/* `inline` resolves the next/font variables where the utility is used. */
+@theme inline {
+  --font-cinzel: var(--ff-cinzel), serif;
+  --font-script: var(--ff-script), cursive;
+  --font-cormorant: var(--ff-cormorant), serif;
+  --font-sinhala: var(--ff-sinhala), serif;
 }
 
 :root {
@@ -26,33 +29,368 @@
 body {
   background-color: var(--background);
   color: var(--foreground);
-  font-family: var(--font-cormorant), serif;
+  font-family: var(--ff-cormorant), serif;
   overflow-x: hidden;
 }
 
-/* Custom traditional Sri Lankan gold foil and decorative gradient utilities */
-.gold-gradient-text {
-  background: linear-gradient(135deg, #8F6F29 0%, #D4AF37 35%, #FFF0BE 55%, #C5A05A 80%, #7A5B1C 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.gold-border {
-  border-image: linear-gradient(135deg, #8F6F29, #D4AF37, #C5A05A, #7A5B1C) 1;
-}
-
+/* Admin and error screens: gold shadow and traditional pattern */
 .gold-box-shadow {
   box-shadow: 0 10px 30px -5px rgba(197, 160, 90, 0.25), 0 0 15px rgba(212, 175, 55, 0.15);
 }
 
-.maroon-box-shadow {
-  box-shadow: 0 12px 36px -6px rgba(123, 38, 58, 0.35);
-}
-
-/* Traditional Sri Lankan pattern background */
 .bg-traditional-pattern {
   background-color: #FFF9EF;
   background-image: radial-gradient(#C5A05A 0.75px, transparent 0.75px), radial-gradient(#7B263A 0.75px, #FFF9EF 0.75px);
   background-size: 30px 30px;
   background-position: 0 0, 15px 15px;
+}
+
+/* ==================================================================== */
+/* Invitation: materials                                                */
+/* ==================================================================== */
+@layer components {
+  .paper-white {
+    background-color: #f9f7f3;
+    background-image: url("/images/textures/paper-white.webp");
+    background-size: 384px 384px;
+  }
+
+  /* Soft watercolour bleeds behind the illustrations */
+  .wash {
+    position: absolute;
+    width: min(70vw, 520px);
+    aspect-ratio: 1;
+    border-radius: 43% 57% 62% 38% / 49% 40% 60% 51%;
+    filter: blur(38px);
+    pointer-events: none;
+    mix-blend-mode: multiply;
+    animation: wash-drift 14s ease-in-out infinite alternate;
+  }
+
+  .wash-rose { background: rgba(226, 150, 150, 0.2); }
+  .wash-gold { background: rgba(232, 188, 96, 0.22); }
+  .wash-wine { background: rgba(140, 40, 66, 0.12); }
+
+  .paper-ivory {
+    background-color: #f7efdf;
+    background-image: url("/images/textures/paper-ivory.webp");
+    background-size: 384px 384px;
+  }
+
+  .paper-maroon {
+    background-color: #451020;
+    background-image: url("/images/textures/paper-maroon.webp");
+    background-size: 384px 384px;
+  }
+
+  /* Moving gold foil for lettering on dark backgrounds */
+  .foil-text {
+    background-image: linear-gradient(105deg, #a9822f 0%, #f1d68a 22%, #fff6d6 34%, #d4ac52 48%, #f6e0a0 68%, #b48a36 84%, #f1d68a 100%);
+    background-size: 220% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: foil-shift 7s ease-in-out infinite alternate;
+    filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.45));
+  }
+
+  /* Deeper foil that stays readable on ivory paper */
+  .foil-text-deep {
+    background-image: linear-gradient(105deg, #6d4a12 0%, #a47d2e 28%, #d3b265 40%, #84601c 55%, #6a1b2e 100%);
+    background-size: 220% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: foil-shift 8s ease-in-out infinite alternate;
+  }
+
+  .foil-border {
+    border: 2px solid transparent;
+    border-image: linear-gradient(135deg, #8a6425, #f0d68e 30%, #a67c32 55%, #ecd08a 80%, #8a6425) 1;
+  }
+
+  .gilt-lining {
+    background-color: #c39a4c;
+    background-image:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='36' height='36'%3E%3Cg fill='none' stroke='%237a5418' stroke-opacity='.55'%3E%3Cpath d='M18 2 34 18 18 34 2 18Z'/%3E%3Ccircle cx='18' cy='18' r='5'/%3E%3Cpath d='M18 8v5M18 23v5M8 18h5M23 18h5'/%3E%3C/g%3E%3C/svg%3E"),
+      linear-gradient(125deg, #8d6623 0%, #e9cd83 30%, #b88d3e 55%, #f2dc9d 75%, #94702b 100%);
+    box-shadow: inset 0 0 28px rgba(60, 30, 0, 0.45);
+  }
+
+  .card-shadow {
+    box-shadow:
+      0 2px 3px rgba(0, 0, 0, 0.3),
+      0 14px 24px -10px rgba(0, 0, 0, 0.5),
+      0 45px 70px -30px rgba(0, 0, 0, 0.7);
+  }
+
+  .print {
+    background-color: #fbf6ea;
+  }
+
+  .glass {
+    background: linear-gradient(160deg, rgba(60, 16, 28, 0.62), rgba(22, 5, 10, 0.7));
+    border: 1px solid rgba(243, 223, 162, 0.35);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    box-shadow: 0 30px 60px -25px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 235, 190, 0.2);
+  }
+
+  .medallion {
+    background: radial-gradient(circle at 32% 28%, #fff3c4, #dbb45c 42%, #9a7229 82%, #c79d47);
+    box-shadow: 0 6px 14px -4px rgba(40, 15, 0, 0.55), inset 0 0 0 3px rgba(255, 240, 190, 0.4), inset 0 -3px 8px rgba(80, 45, 0, 0.35);
+  }
+
+  .flip-card {
+    background: linear-gradient(180deg, #5a1a2b 0%, #3b0e1b 49.6%, #2a0912 50%, #3d101d 100%);
+    border: 1px solid rgba(201, 164, 92, 0.5);
+    box-shadow: 0 18px 30px -14px rgba(0, 0, 0, 0.85), inset 0 1px 0 rgba(255, 225, 170, 0.18);
+    perspective: 500px;
+  }
+
+  /* Arched temple window: always on `.arch-always`, otherwise desktop only */
+  .arch-window.arch-always {
+    border-radius: 999px 999px 14px 14px;
+  }
+
+  .arch-frame:has(> .arch-always)::before {
+    content: "";
+    position: absolute;
+    inset: -11px;
+    border: 1px solid rgba(168, 130, 58, 0.75);
+    border-radius: 999px 999px 22px 22px;
+    pointer-events: none;
+  }
+
+  @media (min-width: 64rem) {
+    .arch-window {
+      border-radius: 999px 999px 14px 14px;
+      box-shadow: 0 40px 80px -30px rgba(0, 0, 0, 0.85);
+    }
+
+    .arch-frame::before {
+      content: "";
+      position: absolute;
+      inset: -13px;
+      border: 1px solid rgba(201, 164, 92, 0.7);
+      border-radius: 999px 999px 24px 24px;
+      pointer-events: none;
+    }
+  }
+
+  /* Buttons */
+  .btn-gold,
+  .btn-ghost,
+  .btn-wine,
+  .btn-outline {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-radius: 999px;
+    padding: 0.75rem 1.4rem;
+    font-family: var(--ff-cinzel), serif;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: transform 0.25s, box-shadow 0.25s, background-color 0.25s, filter 0.25s;
+  }
+
+  .btn-gold {
+    background: linear-gradient(115deg, #b78c38, #f6de9b 38%, #d2a94f 62%, #ecd08a);
+    color: #3a0d19;
+    box-shadow: 0 10px 24px -8px rgba(212, 169, 78, 0.6), inset 0 1px 0 rgba(255, 250, 225, 0.8);
+  }
+
+  .btn-ghost {
+    border: 1px solid rgba(243, 223, 162, 0.6);
+    color: #f6e6bd;
+    background-color: rgba(0, 0, 0, 0.2);
+  }
+
+  .btn-wine {
+    background: linear-gradient(120deg, #8f263e, #581827);
+    color: #fff0cc;
+    box-shadow: 0 10px 20px -10px rgba(88, 24, 39, 0.9);
+  }
+
+  .btn-outline {
+    border: 1px solid #a8823a;
+    color: #3a241c;
+  }
+
+  .btn-gold:hover,
+  .btn-ghost:hover,
+  .btn-wine:hover:not(:disabled),
+  .btn-outline:hover {
+    transform: translateY(-2px);
+    filter: brightness(1.07);
+  }
+
+  .btn-wine:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .btn-shine {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn-shine::after {
+    content: "";
+    position: absolute;
+    inset: 0 auto 0 -60%;
+    width: 40%;
+    background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.75), transparent);
+    transform: skewX(-20deg);
+    animation: shine-sweep 3.2s ease-in-out infinite;
+  }
+
+  .icon-button {
+    display: flex;
+    height: 2.75rem;
+    width: 2.75rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    border: 1px solid rgba(243, 223, 162, 0.55);
+    background-color: rgba(26, 6, 11, 0.6);
+    color: #f3dfa2;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    cursor: pointer;
+  }
+
+  .stepper {
+    display: flex;
+    height: 2.75rem;
+    width: 2.75rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    border: 1px solid #a8823a;
+    color: #7b263a;
+    cursor: pointer;
+  }
+
+  .stepper:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+  }
+}
+
+/* ==================================================================== */
+/* Invitation: motion                                                   */
+/* ==================================================================== */
+.candle-glow {
+  background: radial-gradient(circle, rgba(255, 176, 84, 0.2) 0%, rgba(255, 150, 60, 0.07) 35%, transparent 65%);
+  pointer-events: none;
+  animation: candle-flicker 5s ease-in-out infinite;
+}
+
+.light-leak {
+  background: radial-gradient(ellipse 50% 40% at 15% 10%, rgba(255, 196, 110, 0.35), transparent 70%);
+  mix-blend-mode: screen;
+  animation: leak-drift 11s ease-in-out infinite alternate;
+}
+
+.ken-burns {
+  animation: ken-burns 22s ease-in-out infinite alternate;
+  transform-origin: 50% 30%;
+}
+
+.envelope-float {
+  animation: envelope-float 6s ease-in-out infinite;
+}
+
+/* The illustrated figures sway and breathe very slightly */
+.art-float {
+  animation: art-float 7s ease-in-out infinite;
+  transform-origin: 50% 100%;
+}
+
+@keyframes art-float {
+  0%, 100% { transform: translateY(0) rotate(-0.35deg) scale(1); }
+  50% { transform: translateY(-7px) rotate(0.35deg) scale(1.012); }
+}
+
+@keyframes wash-drift {
+  from { transform: translate3d(0, 0, 0) rotate(0deg) scale(1); }
+  to { transform: translate3d(5%, -6%, 0) rotate(35deg) scale(1.15); }
+}
+
+.seal-halo {
+  animation: seal-halo 2.2s ease-out infinite;
+}
+
+/* A highlight that crosses the seal, masked to the wax itself */
+.seal-glint {
+  background: linear-gradient(115deg, transparent 38%, rgba(255, 250, 220, 0.75) 50%, transparent 62%);
+  background-size: 280% 100%;
+  -webkit-mask: url("/images/textures/wax-seal.webp") center / contain no-repeat;
+  mask: url("/images/textures/wax-seal.webp") center / contain no-repeat;
+  mix-blend-mode: screen;
+  animation: seal-glint 3.8s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes foil-shift {
+  from { background-position: 0% 50%; }
+  to { background-position: 100% 50%; }
+}
+
+@keyframes shine-sweep {
+  0%, 45% { left: -60%; }
+  80%, 100% { left: 130%; }
+}
+
+@keyframes candle-flicker {
+  0%, 100% { opacity: 1; }
+  30% { opacity: 0.78; }
+  52% { opacity: 0.95; }
+  74% { opacity: 0.72; }
+}
+
+@keyframes leak-drift {
+  from { transform: translate3d(-4%, -2%, 0) scale(1); opacity: 0.55; }
+  to { transform: translate3d(14%, 8%, 0) scale(1.25); opacity: 1; }
+}
+
+@keyframes ken-burns {
+  from { transform: scale(1) translate3d(0, 0, 0); }
+  to { transform: scale(1.12) translate3d(-1.5%, 0.5%, 0); }
+}
+
+@keyframes envelope-float {
+  0%, 100% { transform: translateY(0) rotate(-0.4deg); }
+  50% { transform: translateY(-10px) rotate(0.5deg); }
+}
+
+@keyframes seal-halo {
+  0% { box-shadow: 0 0 0 0 rgba(247, 220, 143, 0.7); }
+  100% { box-shadow: 0 0 0 22px rgba(247, 220, 143, 0); }
+}
+
+@keyframes seal-glint {
+  0%, 35% { background-position: 120% 0; }
+  75%, 100% { background-position: -20% 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .foil-text,
+  .foil-text-deep,
+  .btn-shine::after,
+  .candle-glow,
+  .light-leak,
+  .ken-burns,
+  .envelope-float,
+  .art-float,
+  .wash,
+  .seal-halo,
+  .seal-glint {
+    animation: none;
+  }
 }

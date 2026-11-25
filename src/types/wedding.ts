@@ -17,6 +17,8 @@ export interface WeddingSettings {
   language: Language;
   music_url?: string;
   couple_photo_url?: string;
+  couple_photos?: string[];
+  kandyan_art_enabled?: boolean;
   logo_url?: string;
   rsvp_enabled: boolean;
   rsvp_deadline?: string;

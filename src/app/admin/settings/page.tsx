@@ -117,6 +117,88 @@ export default function AdminSettingsPage() {
             </div>
           </div>
 
+          {/* Couple Photography & Portrait Upload */}
+          <div className="bg-white p-6 rounded-2xl border border-[#C5A05A]/30 shadow-sm space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="font-serif font-bold text-base text-[#38251F] flex items-center gap-2">
+                <Heart className="w-4 h-4 text-[#D4AF37]" />
+                <span>Couple Photography (දෙපළගේ ඡායාරූප)</span>
+              </h3>
+              <span className="text-[11px] text-[#8F6F29]">Featured on Royal Invitation &amp; Gallery</span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs items-start">
+              <div className="sm:col-span-2 space-y-3">
+                <div>
+                  <label className="block font-bold text-[#38251F] mb-1">
+                    Couple Portrait Photo (Link or File Upload)
+                  </label>
+                  <input
+                    type="url"
+                    value={settings.couple_photo_url || ""}
+                    onChange={(e) => setSettings({ ...settings, couple_photo_url: e.target.value })}
+                    placeholder="https://example.com/couple-portrait.jpg"
+                    className="w-full p-2.5 bg-[#FFF9EF] border border-[#C5A05A]/40 rounded-lg focus:outline-none text-xs"
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-bold text-[#38251F] mb-1">
+                    Or Upload Directly from Device:
+                  </label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      const reader = new FileReader();
+                      reader.onload = (event) => {
+                        const base64 = event.target?.result as string;
+                        if (base64) {
+                          setSettings({ ...settings, couple_photo_url: base64 });
+                        }
+                      };
+                      reader.readAsDataURL(file);
+                    }}
+                    className="w-full text-xs text-[#8F6F29] file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border file:border-[#C5A05A]/40 file:text-xs file:font-semibold file:bg-[#FFF9EF] file:text-[#7B263A] hover:file:bg-[#FDF4E3] cursor-pointer"
+                  />
+                  <p className="text-[10px] text-[#8F6F29] mt-1">
+                    Accepts JPG, PNG, WEBP. Photo will be displayed inside the traditional gold filigree frame.
+                  </p>
+                </div>
+              </div>
+
+              {/* Photo Preview Card */}
+              <div className="flex flex-col items-center">
+                <span className="font-bold text-[#38251F] mb-1 self-start">Live Preview:</span>
+                <div className="w-full aspect-[4/3] rounded-xl overflow-hidden bg-[#FDF4E3] border-2 border-[#C5A05A]/50 flex items-center justify-center relative shadow-sm">
+                  {settings.couple_photo_url ? (
+                    <img
+                      src={settings.couple_photo_url}
+                      alt="Couple preview"
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="text-center p-3 text-[#8F6F29]">
+                      <Heart className="w-6 h-6 mx-auto mb-1 text-[#C5A05A]/60" />
+                      <span className="text-[11px]">No photo added yet</span>
+                    </div>
+                  )}
+                </div>
+                {settings.couple_photo_url && (
+                  <button
+                    type="button"
+                    onClick={() => setSettings({ ...settings, couple_photo_url: "" })}
+                    className="mt-1 text-[11px] text-red-600 hover:underline cursor-pointer"
+                  >
+                    Clear Photo
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+
           {/* Dates & Auspicious Times */}
           <div className="bg-white p-6 rounded-2xl border border-[#C5A05A]/30 shadow-sm space-y-4">
             <h3 className="font-serif font-bold text-base text-[#38251F] flex items-center gap-2">

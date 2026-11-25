@@ -3,28 +3,28 @@ import { Cinzel, Great_Vibes, Cormorant_Garamond, Noto_Serif_Sinhala } from "nex
 import "./globals.css";
 
 const cinzel = Cinzel({
-  variable: "--font-cinzel",
+  variable: "--ff-cinzel",
   subsets: ["latin"],
   weight: ["400", "600", "700", "800"],
   display: "swap",
 });
 
 const greatVibes = Great_Vibes({
-  variable: "--font-great-vibes",
+  variable: "--ff-script",
   subsets: ["latin"],
   weight: ["400"],
   display: "swap",
 });
 
 const cormorant = Cormorant_Garamond({
-  variable: "--font-cormorant",
+  variable: "--ff-cormorant",
   subsets: ["latin"],
   weight: ["300", "400", "500", "600", "700"],
   display: "swap",
 });
 
 const sinhala = Noto_Serif_Sinhala({
-  variable: "--font-sinhala",
+  variable: "--ff-sinhala",
   subsets: ["sinhala"],
   weight: ["400", "500", "600", "700"],
   display: "swap",

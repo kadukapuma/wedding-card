@@ -4,12 +4,12 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { LotusMotif, CornerFiligree } from "@/components/invitation/TraditionalMotifs";
-import { Lock, Mail, ArrowRight, Sparkles, CheckCircle2 } from "lucide-react";
+import { Lock, Mail, ArrowRight } from "lucide-react";
 
 export default function AdminLoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState("admin@wedding.lk");
-  const [password, setPassword] = useState("admin123");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
@@ -18,15 +18,6 @@ export default function AdminLoginPage() {
     setLoading(true);
     setErrorMessage("");
 
-    // 1. Check for local demo bypass credentials
-    if (email === "admin@wedding.lk" && password === "admin123") {
-      setTimeout(() => {
-        router.push("/admin/dashboard");
-      }, 400);
-      return;
-    }
-
-    // 2. Real Supabase Authentication
     try {
       const supabase = createClient();
       const { data, error } = await supabase.auth.signInWithPassword({
@@ -35,24 +26,17 @@ export default function AdminLoginPage() {
       });
 
       if (error) {
+        // Provide clear feedback or demo access notice
         setErrorMessage(error.message);
       } else if (data.session) {
         router.push("/admin/dashboard");
       }
-    } catch {
-      setErrorMessage("Could not connect to authentication server. For local testing, use admin@wedding.lk / admin123");
+    } catch (err: unknown) {
+      const error = err as Error;
+      setErrorMessage(error.message || "Failed to authenticate");
     } finally {
       setLoading(false);
     }
-  };
-
-  const fillDemoCredentials = () => {
-    setEmail("admin@wedding.lk");
-    setPassword("admin123");
-    setErrorMessage("");
-    setTimeout(() => {
-      router.push("/admin/dashboard");
-    }, 200);
   };
 
   return (
@@ -65,7 +49,7 @@ export default function AdminLoginPage() {
           <CornerFiligree position="top-right" className="w-10 h-10 text-[#C5A05A]" />
         </div>
 
-        <div className="text-center pt-2 mb-5">
+        <div className="text-center pt-2 mb-6">
           <LotusMotif className="w-10 h-10 mx-auto text-[#7B263A] mb-2" />
           <h1 className="font-serif text-2xl font-bold text-[#38251F]">
             Organizer Portal
@@ -73,26 +57,6 @@ export default function AdminLoginPage() {
           <p className="text-xs text-[#8F6F29]">
             Traditional Sri Lankan Wedding Management
           </p>
-        </div>
-
-        {/* Local Quick Demo Login Helper Box */}
-        <div className="mb-5 p-3.5 rounded-xl bg-[#FDF4E3] border border-[#C5A05A]/50 text-xs">
-          <div className="flex items-center gap-1.5 font-bold text-[#7B263A] mb-1">
-            <Sparkles className="w-4 h-4 text-[#C5A05A]" />
-            <span>Local Demo Credentials:</span>
-          </div>
-          <div className="space-y-0.5 text-[#38251F] font-mono text-[11px] mb-2.5">
-            <p><strong>Email:</strong> admin@wedding.lk</p>
-            <p><strong>Password:</strong> admin123</p>
-          </div>
-          <button
-            type="button"
-            onClick={fillDemoCredentials}
-            className="w-full py-2 px-3 rounded-lg bg-gradient-to-r from-[#C5A05A] to-[#D4AF37] text-[#38251F] font-bold text-xs uppercase tracking-wider hover:opacity-95 shadow-sm transition flex items-center justify-center gap-1.5 cursor-pointer"
-          >
-            <CheckCircle2 className="w-3.5 h-3.5" />
-            <span>1-Click Instant Demo Login</span>
-          </button>
         </div>
 
         {errorMessage && (
@@ -113,7 +77,7 @@ export default function AdminLoginPage() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="admin@wedding.lk"
+                placeholder="organizer@wedding.lk"
                 className="w-full pl-9 pr-3 py-2 text-xs bg-white border border-[#C5A05A]/40 rounded-lg focus:outline-none focus:border-[#7B263A]"
               />
             </div>
@@ -141,14 +105,14 @@ export default function AdminLoginPage() {
             disabled={loading}
             className="w-full py-2.5 rounded-xl bg-gradient-to-r from-[#7B263A] to-[#581827] text-white text-xs font-bold uppercase tracking-wider shadow hover:opacity-95 transition flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
           >
-            <span>{loading ? "Signing in..." : "Sign In with Credentials"}</span>
+            <span>{loading ? "Authenticating..." : "Sign In to Dashboard"}</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </button>
         </form>
 
-        <div className="mt-5 pt-3 border-t border-[#C5A05A]/20 text-center">
-          <p className="text-[10px] text-[#49382D]/70">
-            In production: use the email and password you create in your Supabase Auth dashboard.
+        <div className="mt-6 pt-4 border-t border-[#C5A05A]/20 text-center">
+          <p className="text-[11px] text-[#49382D]/70">
+            For initial setup, create your administrator user in the Supabase Authentication dashboard.
           </p>
         </div>
       </div>
