@@ -2,9 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { AdminNav } from "@/components/admin/AdminNav";
-import { createClient } from "@/lib/supabase/client";
 import { Guest } from "@/types/wedding";
-import { generateSecureToken } from "@/lib/validation/guest";
 import { generateWhatsAppLink, generateInvitationUrl } from "@/lib/whatsapp/share";
 import {
   Users,
@@ -17,49 +15,22 @@ import {
   Trash2,
   ExternalLink,
   Phone,
-  FileSpreadsheet
+  FileSpreadsheet,
+  CheckCircle2,
+  AlertCircle
 } from "lucide-react";
 import Papa from "papaparse";
 
 export default function AdminGuestsPage() {
-  const [guests, setGuests] = useState<Guest[]>([
-    {
-      id: "1",
-      guest_name: "Mr. Kasun Perera & Family",
-      family_name: "Perera Family",
-      phone: "94771234567",
-      allowed_guests: 3,
-      invitation_token: "a8k29xyz",
-      rsvp_status: "accepted",
-      viewed_at: "2026-11-20T10:00:00Z",
-    },
-    {
-      id: "2",
-      guest_name: "Mr. Nimal Silva & Family",
-      family_name: "Silva Family",
-      phone: "94772345678",
-      allowed_guests: 2,
-      invitation_token: "b9c34kpm",
-      rsvp_status: "pending",
-      viewed_at: null,
-    },
-    {
-      id: "3",
-      guest_name: "Dr. Amal Fernando",
-      family_name: "Fernando Family",
-      phone: "94773456789",
-      allowed_guests: 2,
-      invitation_token: "c4d78wqr",
-      rsvp_status: "declined",
-      viewed_at: "2026-11-21T14:30:00Z",
-    },
-  ]);
-
+  const [guests, setGuests] = useState<Guest[]>([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [filterRsvp, setFilterRsvp] = useState("all");
   const [showAddModal, setShowAddModal] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
   const [copiedToken, setCopiedToken] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   // Form states
   const [newGuestName, setNewGuestName] = useState("");
@@ -71,69 +42,86 @@ export default function AdminGuestsPage() {
   const [csvPreview, setCsvPreview] = useState<any[]>([]);
   const [importing, setImporting] = useState(false);
 
-  useEffect(() => {
-    async function fetchGuests() {
-      try {
-        const supabase = createClient();
-        const { data } = await supabase
-          .from("guests")
-          .select("*")
-          .order("created_at", { ascending: false });
-        if (data && data.length > 0) {
-          setGuests(data as Guest[]);
-        }
-      } catch (err) {
-        console.warn("Using sample guests list:", err);
+  const fetchGuests = async () => {
+    try {
+      setLoading(true);
+      const res = await fetch("/api/guests");
+      const data = await res.json();
+      if (data.guests) {
+        setGuests(data.guests);
       }
+    } catch (err) {
+      console.warn("Failed to fetch guests from API:", err);
+    } finally {
+      setLoading(false);
     }
+  };
+
+  useEffect(() => {
     fetchGuests();
   }, []);
+
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 3500);
+  };
 
   const handleCopyLink = (token: string) => {
     const url = generateInvitationUrl(token);
     navigator.clipboard.writeText(url);
     setCopiedToken(token);
+    showToast("Personalized invitation link copied to clipboard!");
     setTimeout(() => setCopiedToken(null), 2000);
   };
 
   const handleAddGuest = async (e: React.FormEvent) => {
     e.preventDefault();
-    const token = generateSecureToken(8);
-    const newGuest: Guest = {
-      id: typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : `g-${Date.now()}`,
-      guest_name: newGuestName,
-      family_name: newFamilyName || newGuestName,
-      phone: newPhone,
-      allowed_guests: newAllowed,
-      invitation_token: token,
-      rsvp_status: "pending",
-      viewed_at: null,
-    };
+    if (!newGuestName.trim()) return;
+    setIsSubmitting(true);
 
     try {
-      const supabase = createClient();
-      await supabase.from("guests").insert([newGuest]);
-    } catch {
-      // Local fallback
-    }
+      const res = await fetch("/api/guests", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          guest_name: newGuestName,
+          family_name: newFamilyName || newGuestName,
+          phone: newPhone,
+          allowed_guests: newAllowed,
+        }),
+      });
 
-    setGuests([newGuest, ...guests]);
-    setShowAddModal(false);
-    setNewGuestName("");
-    setNewFamilyName("");
-    setNewPhone("");
-    setNewAllowed(2);
+      const data = await res.json();
+      if (data.guest) {
+        setGuests([data.guest, ...guests]);
+        setShowAddModal(false);
+        setNewGuestName("");
+        setNewFamilyName("");
+        setNewPhone("");
+        setNewAllowed(2);
+        showToast(`Invitation created for ${data.guest.guest_name}!`);
+      } else {
+        alert(data.error || "Failed to create guest invitation");
+      }
+    } catch (err) {
+      console.error("Error creating guest:", err);
+      alert("Error creating invitation. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  const handleDeleteGuest = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this guest?")) return;
+  const handleDeleteGuest = async (id: string, name: string) => {
+    if (!confirm(`Are you sure you want to delete invitation for ${name}?`)) return;
     try {
-      const supabase = createClient();
-      await supabase.from("guests").delete().eq("id", id);
-    } catch {
-      // Local fallback
+      const res = await fetch(`/api/guests?id=${id}`, { method: "DELETE" });
+      if (res.ok) {
+        setGuests(guests.filter((g) => g.id !== id));
+        showToast("Invitation deleted.");
+      }
+    } catch (err) {
+      console.error("Failed to delete guest:", err);
     }
-    setGuests(guests.filter((g) => g.id !== id));
   };
 
   const handleCsvFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -153,28 +141,30 @@ export default function AdminGuestsPage() {
     if (csvPreview.length === 0) return;
     setImporting(true);
 
-    const generatedGuests: Guest[] = csvPreview.map((row: any) => ({
-      id: typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : `g-${Math.random()}`,
-      guest_name: row.guest_name || "Valued Guest",
-      family_name: row.family_name || row.guest_name || "Family",
-      phone: row.phone || "",
-      allowed_guests: Number(row.allowed_guests) || 1,
-      invitation_token: generateSecureToken(8),
-      rsvp_status: "pending",
-      viewed_at: null,
-    }));
-
     try {
-      const supabase = createClient();
-      await supabase.from("guests").insert(generatedGuests);
-    } catch {
-      // Local fallback
+      for (const row of csvPreview) {
+        if (!row.guest_name) continue;
+        await fetch("/api/guests", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            guest_name: row.guest_name,
+            family_name: row.family_name || row.guest_name,
+            phone: row.phone || "",
+            allowed_guests: Number(row.allowed_guests) || 1,
+          }),
+        });
+      }
+      await fetchGuests();
+      setCsvPreview([]);
+      setShowImportModal(false);
+      showToast(`Successfully imported ${csvPreview.length} guests!`);
+    } catch (err) {
+      console.error("CSV import error:", err);
+      alert("An error occurred during CSV import.");
+    } finally {
+      setImporting(false);
     }
-
-    setGuests([...generatedGuests, ...guests]);
-    setCsvPreview([]);
-    setImporting(false);
-    setShowImportModal(false);
   };
 
   const filteredGuests = guests.filter((g) => {
@@ -189,6 +179,14 @@ export default function AdminGuestsPage() {
     <div className="min-h-screen bg-[#FFF9EF] text-[#49382D]">
       <AdminNav />
 
+      {/* Floating Toast Notification */}
+      {toastMessage && (
+        <div className="fixed bottom-5 right-5 z-50 bg-[#7B263A] text-white px-4 py-2.5 rounded-xl shadow-xl border border-[#D4AF37] flex items-center gap-2 text-xs font-semibold animate-bounce">
+          <CheckCircle2 className="w-4 h-4 text-[#D4AF37]" />
+          <span>{toastMessage}</span>
+        </div>
+      )}
+
       <main className="max-w-6xl mx-auto px-4 py-8">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
           <div>
@@ -196,7 +194,7 @@ export default function AdminGuestsPage() {
               Guest Invitations &amp; WhatsApp Links
             </h2>
             <p className="text-xs text-[#8F6F29] mt-0.5">
-              Personalized links, attendance status, and instant WhatsApp Click-to-Chat sharing
+              Generate personalized wedding invitation links with 1-click WhatsApp sharing
             </p>
           </div>
 
@@ -262,10 +260,16 @@ export default function AdminGuestsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#C5A05A]/20">
-                {filteredGuests.length === 0 ? (
+                {loading ? (
                   <tr>
                     <td colSpan={6} className="py-8 text-center text-xs text-[#8F6F29]">
-                      No guests match your criteria.
+                      Loading guest list...
+                    </td>
+                  </tr>
+                ) : filteredGuests.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} className="py-8 text-center text-xs text-[#8F6F29]">
+                      No guests match your criteria. Click &quot;Add Guest&quot; above to create one!
                     </td>
                   </tr>
                 ) : (
@@ -350,7 +354,7 @@ export default function AdminGuestsPage() {
 
                             {/* Delete Guest */}
                             <button
-                              onClick={() => handleDeleteGuest(guest.id)}
+                              onClick={() => handleDeleteGuest(guest.id, guest.guest_name)}
                               className="p-1.5 rounded-lg text-rose-600 hover:bg-rose-50 cursor-pointer"
                               title="Delete"
                             >
@@ -439,9 +443,10 @@ export default function AdminGuestsPage() {
                   </button>
                   <button
                     type="submit"
-                    className="px-5 py-2 rounded-lg bg-[#7B263A] text-white font-bold cursor-pointer"
+                    disabled={isSubmitting}
+                    className="px-5 py-2 rounded-lg bg-[#7B263A] text-white font-bold cursor-pointer disabled:opacity-50"
                   >
-                    Generate Invitation
+                    {isSubmitting ? "Generating..." : "Generate Invitation"}
                   </button>
                 </div>
               </form>

@@ -20,14 +20,16 @@ export default function AdminDashboardPage() {
   useEffect(() => {
     async function loadStats() {
       try {
-        const supabase = createClient();
-        const { data: guests } = await supabase.from("guests").select("*");
+        const res = await fetch("/api/guests");
+        const json = await res.json();
+        const guests = json.guests;
+
         if (guests && guests.length > 0) {
-          const viewed = guests.filter((g) => g.viewed_at).length;
-          const accepted = guests.filter((g) => g.rsvp_status === "accepted").length;
-          const declined = guests.filter((g) => g.rsvp_status === "declined").length;
-          const pending = guests.filter((g) => g.rsvp_status === "pending").length;
-          const totalPeople = guests.reduce((sum, g) => sum + (g.allowed_guests || 1), 0);
+          const viewed = guests.filter((g: any) => g.viewed_at).length;
+          const accepted = guests.filter((g: any) => g.rsvp_status === "accepted").length;
+          const declined = guests.filter((g: any) => g.rsvp_status === "declined").length;
+          const pending = guests.filter((g: any) => g.rsvp_status === "pending").length;
+          const totalPeople = guests.reduce((sum: number, g: any) => sum + (g.allowed_guests || 1), 0);
 
           setStats({
             totalGuests: guests.length,

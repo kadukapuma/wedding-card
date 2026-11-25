@@ -1,9 +1,9 @@
 import { Metadata } from "next";
-import { notFound } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase/server";
 import { AnimatedInvitationView } from "@/components/invitation/AnimatedInvitationView";
 import { WeddingSettings } from "@/types/wedding";
 import { LotusMotif } from "@/components/invitation/TraditionalMotifs";
+import { getGuestByToken } from "@/lib/data/guestStore";
 import Link from "next/link";
 
 export const dynamic = "force-dynamic";
@@ -25,7 +25,7 @@ const DEFAULT_WEDDING: WeddingSettings = {
   maps_url: "https://maps.google.com/?q=Mount+Lavinia+Hotel",
   invitation_message: "Together with our families, we cordially invite you to celebrate the auspicious marriage ceremony of our children.",
   closing_message: "Your gracious presence and blessings on our special day will make our celebration complete.",
-  dress_code: "Traditional Sri Lankan Formal / Lounge",
+  dress_code: "Traditional Sri Lankan Formal / Lounge Suit",
   language: "en",
   rsvp_enabled: true,
   rsvp_deadline: "1st October 2026",
@@ -33,18 +33,11 @@ const DEFAULT_WEDDING: WeddingSettings = {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { token } = await params;
-  const supabase = createAdminClient();
-
   let guestName = "Valued Guest";
   try {
-    const { data } = await supabase
-      .from("guests")
-      .select("guest_name, family_name")
-      .eq("invitation_token", token)
-      .maybeSingle();
-
-    if (data?.guest_name) {
-      guestName = data.guest_name;
+    const guest = await getGuestByToken(token);
+    if (guest?.guest_name) {
+      guestName = guest.guest_name;
     }
   } catch {
     // metadata fallback
@@ -82,7 +75,7 @@ export default async function InvitePage({ params }: PageProps) {
   let weddingSettings = DEFAULT_WEDDING;
 
   try {
-    // 1. Fetch wedding settings
+    // 1. Fetch wedding settings from Supabase if configured
     const { data: settings } = await supabase
       .from("wedding_settings")
       .select("*")
@@ -95,48 +88,21 @@ export default async function InvitePage({ params }: PageProps) {
         ...settings,
       };
     }
-
-    // 2. Fetch guest record securely
-    const { data: guest } = await supabase
-      .from("guests")
-      .select("id, guest_name, family_name, allowed_guests, rsvp_status")
-      .eq("invitation_token", token)
-      .maybeSingle();
-
-    if (guest) {
-      guestData = guest;
-
-      // Log invitation view audit
-      await supabase.from("invitation_views").insert({
-        guest_id: guest.id,
-      });
-
-      // Update viewed_at
-      await supabase
-        .from("guests")
-        .update({ viewed_at: new Date().toISOString() })
-        .eq("id", guest.id);
-
-      // Fetch existing RSVP if any
-      const { data: rsvp } = await supabase
-        .from("rsvps")
-        .select("response, attending_count, message")
-        .eq("guest_id", guest.id)
-        .maybeSingle();
-
-      if (rsvp) {
-        existingRsvp = rsvp as {
-          response: "accepted" | "declined";
-          attending_count: number;
-          message?: string;
-        };
-      }
-    }
   } catch (err) {
-    console.warn("Supabase query error or not yet configured:", err);
+    console.warn("Using default wedding settings:", err);
   }
 
-  // Graceful fallback for local testing with sample token
+  // 2. Fetch guest record securely using dual-mode store (Supabase + local fallback)
+  try {
+    const foundGuest = await getGuestByToken(token);
+    if (foundGuest) {
+      guestData = foundGuest;
+    }
+  } catch (err) {
+    console.warn("Guest token lookup error:", err);
+  }
+
+  // 3. Graceful fallback for demo tokens
   if (!guestData) {
     if (token === "sample" || token === "a8k29xyz" || token === "demo") {
       guestData = {
