@@ -45,10 +45,9 @@ export function Gallery({ items }: { items: GalleryItem[] }) {
   }, [isOpen, step]);
 
   return (
-    <section className="paper-maroon relative overflow-hidden px-4 py-24 sm:py-32">
-      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_bottom,#1a060b,transparent_20%,transparent_80%,#1a060b)]" />
+    <section className="paper-white relative overflow-hidden px-4 py-24 sm:py-32">
       <div className="relative">
-        <SectionHeading sinhala="අපගේ මතකයන්" title="Our Moments" />
+        <SectionHeading sinhala="අපගේ මතකයන්" title="Our Moments" tone="light" />
 
         <ul className="mx-auto mt-14 max-w-5xl columns-2 gap-4 sm:gap-6 lg:columns-3">
           {items.map(({ src, alt, shape }, i) => (
@@ -65,17 +64,14 @@ export function Gallery({ items }: { items: GalleryItem[] }) {
                 type="button"
                 onClick={() => setOpen(i)}
                 aria-label={`View photo ${i + 1} of ${count}`}
-                className="print card-shadow group block w-full cursor-zoom-in rounded-[3px] p-2 pb-7 sm:p-3 sm:pb-10"
+                className="group block w-full cursor-zoom-in"
               >
-                <span className={`relative block w-full overflow-hidden ${shape}`}>
+                <span className={`artwork-feather relative block w-full overflow-hidden ${shape}`}>
                   <Photo
                     src={src}
                     alt={alt}
                     sizes="(min-width: 1024px) 33vw, 50vw"
-                    className={`transition-transform duration-[1200ms] group-hover:scale-110 ${
-                      // Only the illustrations' white paper should melt into the print.
-                      src.startsWith("/images/art/") ? "mix-blend-multiply" : ""
-                    }`}
+                    className="transition-transform duration-[1200ms] group-hover:scale-105"
                   />
                 </span>
               </button>

@@ -2,6 +2,12 @@
 
 import React from "react";
 import Image from "next/image";
+import bride from "../../../../public/images/art/kandyan/bride.webp";
+import groom from "../../../../public/images/art/kandyan/groom.webp";
+import poruwa from "../../../../public/images/art/kandyan/poruwa.webp";
+import venue from "../../../../public/images/art/kandyan/venue.webp";
+import walking from "../../../../public/images/art/kandyan/walking.webp";
+import hands from "../../../../public/images/art/kandyan/hands.webp";
 import { motion } from "framer-motion";
 import { LotusMotif } from "@/components/invitation/TraditionalMotifs";
 
@@ -15,50 +21,37 @@ export interface Artwork {
 }
 
 /**
- * Original AI-generated cartoon illustrations. Their paper is pure white, so
- * multiply blending dissolves it into whatever sheet they are placed on.
+ * Coordinated wedding illustrations based on the supplied ceremonial portrait.
  */
 export const ART = {
   couple: {
-    src: "/images/art/kandyan/couple.webp",
+    src: "/images/art/kandyan/ceremonial-couple-cutout.png",
     width: 1024,
-    height: 1280,
-    alt: "Illustration of a groom in Kandyan Mul Anduma beside his bride in an ivory osariya",
+    height: 1536,
+    alt: "Illustration of a groom in ceremonial Kandyan dress with a sword beside his bride in an ivory osariya",
   },
   bride: {
-    src: "/images/art/kandyan/bride.webp",
-    width: 404,
-    height: 614,
+    ...bride,
     alt: "Illustration of the smiling bride in her gold ornaments",
   },
   groom: {
-    src: "/images/art/kandyan/groom.webp",
-    width: 614,
-    height: 691,
+    ...groom,
     alt: "Illustration of the groom in the traditional Kandyan Mul Anduma",
   },
   poruwa: {
-    src: "/images/art/kandyan/poruwa.webp",
-    width: 1024,
-    height: 1024,
-    alt: "Illustration of the couple holding hands on a flower-draped Poruwa",
+    ...poruwa,
+    alt: "Illustration of the couple standing on a flower-draped Poruwa",
   },
   venue: {
-    src: "/images/art/kandyan/venue.webp",
-    width: 1536,
-    height: 1024,
-    alt: "Watercolour of a seaside terrace at sunset",
+    ...venue,
+    alt: "Illustration of a seaside wedding terrace decorated with ivory flowers",
   },
   walking: {
-    src: "/images/art/kandyan/walking.webp",
-    width: 1024,
-    height: 1536,
-    alt: "Illustration of the couple walking together among falling flowers",
+    ...walking,
+    alt: "Illustration of the couple walking through a jasmine garden",
   },
   hands: {
-    src: "/images/art/kandyan/hands.webp",
-    width: 1024,
-    height: 1280,
+    ...hands,
     alt: "Illustration of the couple's hands with wedding rings above white roses",
   },
 } satisfies Record<string, Artwork>;
@@ -99,7 +92,7 @@ export function Illustration({
           width={art.width}
           height={art.height}
           sizes={sizes}
-          className={`h-auto w-full ${float ? "art-float" : ""}`}
+          className={`artwork-feather h-auto w-full ${float ? "art-float" : ""}`}
         />
       </motion.div>
     </motion.div>

@@ -60,12 +60,14 @@ export function Hero({
   return (
     <header
       ref={ref}
-      className="paper-white relative flex min-h-[100svh] w-full flex-col items-center justify-center overflow-hidden px-4 pb-14 pt-16 text-[#3a241c] lg:flex-row lg:gap-10 lg:py-10"
+      className="royal-hero relative flex min-h-[100svh] w-full flex-col items-center justify-center overflow-hidden px-5 pb-14 pt-20 text-[#f8eed6] lg:flex-row lg:gap-16 lg:px-14 lg:py-10"
     >
-      <span className="wash wash-rose left-[-18%] top-[8%]" aria-hidden="true" />
-      <span className="wash wash-gold right-[-20%] top-[38%]" aria-hidden="true" />
+      <div className="royal-hero-pattern absolute inset-0" aria-hidden="true" />
+      <div className="royal-hero-halo absolute left-[12%] top-[12%] h-[66vw] max-h-[760px] w-[66vw] max-w-[760px] rounded-full" aria-hidden="true" />
+      <div className="absolute inset-4 border border-[#d5b86a]/25 sm:inset-7" aria-hidden="true" />
+      <div className="absolute inset-6 border border-[#d5b86a]/10 sm:inset-9" aria-hidden="true" />
 
-      <p className="relative self-end pr-1 text-right font-cormorant text-lg italic leading-tight lg:absolute lg:right-24 lg:top-8 lg:text-2xl">
+      <p className="relative z-10 self-end pr-4 text-right font-cormorant text-lg italic leading-tight text-[#e9d59d] lg:absolute lg:right-24 lg:top-12 lg:text-2xl">
         <Written delay={1.2} duration={1.3}>
           <span className="font-script text-[1.9em] leading-none">T</span>rue love stories
         </Written>
@@ -94,7 +96,7 @@ export function Hero({
         </motion.div>
       ) : (
         <motion.div
-          className="relative w-[min(100%,calc(52svh*0.8),460px)] mix-blend-multiply lg:w-[min(48vw,calc(90svh*0.8))]"
+          className="relative z-[1] -mb-2 mt-4 w-[min(96%,calc(58svh*0.67),430px)] drop-shadow-[0_32px_32px_rgba(0,0,0,0.5)] lg:mb-[-2.5rem] lg:mt-0 lg:w-[min(46vw,calc(94svh*0.67))]"
           style={{ y: artY }}
         >
           <motion.div
@@ -115,41 +117,41 @@ export function Hero({
         </motion.div>
       )}
 
-      <motion.div className="relative z-10 text-center lg:w-[40%]" style={{ y: textY }}>
+      <motion.div className="relative z-10 mt-2 text-center lg:mt-0 lg:w-[40%] lg:text-left" style={{ y: textY }}>
         <motion.p
           {...fadeUp(0.8)}
-          className="font-cinzel text-[10px] font-semibold uppercase tracking-[0.4em] text-[#8a6425] sm:text-xs"
+          className="font-cinzel text-[10px] font-semibold uppercase tracking-[0.4em] text-[#d8bc73] sm:text-xs"
         >
           Together with their families
         </motion.p>
 
-        <h1 className="mt-1 text-[#6d1a30]">
+        <h1 className="mt-3 text-[#fff7e5]">
           <Written
             delay={1.1}
-            className="px-4 font-script text-[clamp(3.2rem,15vw,5.5rem)] leading-[1.1] lg:text-[clamp(4rem,7vw,7.5rem)]"
+            className="px-4 font-script text-[clamp(3.2rem,15vw,5.5rem)] leading-[1.1] drop-shadow-[0_4px_18px_rgba(0,0,0,0.45)] lg:px-0 lg:text-[clamp(4rem,7vw,7.5rem)]"
           >
             {first(brideName)}
           </Written>
           <motion.span
             {...fadeUp(2)}
-            className="-my-2 block font-script text-3xl text-[#a8823a] lg:text-5xl"
+            className="-my-2 block font-script text-3xl text-[#d7b458] lg:ml-10 lg:text-5xl"
           >
             &amp;
           </motion.span>
           <Written
             delay={2.2}
-            className="px-4 font-script text-[clamp(3.2rem,15vw,5.5rem)] leading-[1.1] lg:text-[clamp(4rem,7vw,7.5rem)]"
+            className="px-4 font-script text-[clamp(3.2rem,15vw,5.5rem)] leading-[1.1] drop-shadow-[0_4px_18px_rgba(0,0,0,0.45)] lg:px-0 lg:text-[clamp(4rem,7vw,7.5rem)]"
           >
             {first(groomName)}
           </Written>
         </h1>
 
         <motion.div {...fadeUp(3.2)} className="mt-2">
-          <div className="mx-auto h-px w-40 bg-gradient-to-r from-transparent via-[#a8823a] to-transparent" />
+          <div className="mx-auto h-px w-40 bg-gradient-to-r from-transparent via-[#d8bc73] to-transparent lg:mx-0" />
           <p className="mt-3 font-cinzel text-sm font-semibold uppercase tracking-[0.18em] sm:text-base">
             {dateLabel}
           </p>
-          <p className="mt-1 px-4 font-cormorant text-lg italic text-[#7b263a]">{venueName}</p>
+          <p className="mt-1 px-4 font-cormorant text-lg italic text-[#e9d59d] lg:px-0">{venueName}</p>
         </motion.div>
       </motion.div>
 

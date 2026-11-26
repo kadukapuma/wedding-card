@@ -70,8 +70,8 @@ export function AnimatedInvitationView({
     print(ART.couple, "aspect-[4/5]"),
     print(ART.bride, "aspect-[2/3]"),
     print(ART.walking, "aspect-[2/3]"),
-    print(ART.poruwa, "aspect-square"),
-    print(ART.groom, "aspect-[8/9]"),
+    print(ART.poruwa, "aspect-[2/3]"),
+    print(ART.groom, "aspect-[2/3]"),
     print(ART.hands, "aspect-[4/5]"),
   ];
 
