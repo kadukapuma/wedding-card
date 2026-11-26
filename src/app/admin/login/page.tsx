@@ -2,10 +2,11 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { LotusMotif, CornerFiligree } from "@/components/invitation/TraditionalMotifs";
-import { Lock, Mail, ArrowRight } from "lucide-react";
+import { Lock, Mail, ArrowRight, AlertCircle, ArrowLeft } from "lucide-react";
 
 export default function AdminLoginPage() {
   const router = useRouter();
@@ -33,7 +34,6 @@ export default function AdminLoginPage() {
       });
 
       if (error) {
-        // Provide clear feedback or demo access notice
         setErrorMessage(error.message);
       } else if (data.session) {
         router.push("/admin/dashboard");
@@ -47,79 +47,102 @@ export default function AdminLoginPage() {
   };
 
   return (
-    <main className="min-h-screen bg-traditional-pattern flex flex-col items-center justify-center p-4">
-      <div className="w-full max-w-md bg-[#FFF9EF] border-2 border-[#C5A05A] rounded-2xl p-6 sm:p-8 gold-box-shadow relative">
-        <div className="absolute top-2 left-2">
-          <CornerFiligree position="top-left" className="w-10 h-10 text-[#C5A05A]" />
+    <main className="min-h-screen bg-[#FAF7F2] font-sans antialiased text-stone-800 flex flex-col items-center justify-center p-4 sm:p-6 relative">
+      <div className="w-full max-w-md bg-white border border-stone-200/90 rounded-3xl p-6 sm:p-9 shadow-xl relative overflow-hidden">
+        {/* Subtle Decorative Corners */}
+        <div className="absolute top-2 left-2 opacity-40">
+          <CornerFiligree position="top-left" className="w-8 h-8 text-[#C5A05A]" />
         </div>
-        <div className="absolute top-2 right-2">
-          <CornerFiligree position="top-right" className="w-10 h-10 text-[#C5A05A]" />
+        <div className="absolute top-2 right-2 opacity-40">
+          <CornerFiligree position="top-right" className="w-8 h-8 text-[#C5A05A]" />
         </div>
 
-        <div className="text-center pt-2 mb-6">
-          <LotusMotif className="w-10 h-10 mx-auto text-[#7B263A] mb-2" />
-          <h1 className="font-serif text-2xl font-bold text-[#38251F]">
+        {/* Brand Header */}
+        <div className="text-center pt-2 mb-6 sm:mb-8">
+          <div className="w-14 h-14 mx-auto mb-3 rounded-2xl bg-[#7B263A]/10 border border-[#7B263A]/20 flex items-center justify-center shadow-xs">
+            <LotusMotif className="w-8 h-8 text-[#7B263A]" />
+          </div>
+          <h1 className="font-serif text-2xl sm:text-3xl font-bold text-stone-900 leading-tight">
             Organizer Portal
           </h1>
-          <p className="text-xs text-[#8F6F29]">
-            Traditional Sri Lankan Wedding Management
+          <p className="text-sm text-stone-600 mt-1 font-medium">
+            Sri Lankan Royal Wedding Management Console
           </p>
         </div>
 
         {errorMessage && (
-          <div className="mb-4 p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-xs">
-            {errorMessage}
+          <div
+            role="alert"
+            className="mb-5 p-4 rounded-xl bg-red-50 border border-red-200 text-red-800 text-sm flex items-start gap-3 shadow-xs"
+          >
+            <AlertCircle className="w-5 h-5 text-red-600 shrink-0 mt-0.5" />
+            <div>
+              <p className="font-semibold">Authentication Error</p>
+              <p className="text-xs text-red-700 mt-0.5">{errorMessage}</p>
+            </div>
           </div>
         )}
 
+        {/* Login Form */}
         <form onSubmit={handleLogin} className="space-y-4">
           <div>
-            <label className="block text-xs font-bold text-[#38251F] mb-1">
+            <label className="block text-sm font-semibold text-stone-900 mb-1.5">
               Organizer Email
             </label>
             <div className="relative">
-              <Mail className="w-4 h-4 text-[#8F6F29] absolute left-3 top-2.5" />
+              <Mail className="w-5 h-5 text-stone-400 absolute left-3.5 top-3.5" />
               <input
                 type="email"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="organizer@wedding.lk"
-                className="w-full pl-9 pr-3 py-2 text-xs bg-white border border-[#C5A05A]/40 rounded-lg focus:outline-none focus:border-[#7B263A]"
+                className="w-full h-12 pl-11 pr-4 text-base bg-stone-50 border border-stone-300 rounded-xl focus:outline-none focus:bg-white focus:border-amber-600 focus:ring-2 focus:ring-amber-500/20 text-stone-900 placeholder:text-stone-400"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-[#38251F] mb-1">
-              Password
-            </label>
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="block text-sm font-semibold text-stone-900">
+                Password
+              </label>
+            </div>
             <div className="relative">
-              <Lock className="w-4 h-4 text-[#8F6F29] absolute left-3 top-2.5" />
+              <Lock className="w-5 h-5 text-stone-400 absolute left-3.5 top-3.5" />
               <input
                 type="password"
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••••••"
-                className="w-full pl-9 pr-3 py-2 text-xs bg-white border border-[#C5A05A]/40 rounded-lg focus:outline-none focus:border-[#7B263A]"
+                className="w-full h-12 pl-11 pr-4 text-base bg-stone-50 border border-stone-300 rounded-xl focus:outline-none focus:bg-white focus:border-amber-600 focus:ring-2 focus:ring-amber-500/20 text-stone-900 placeholder:text-stone-400"
               />
             </div>
           </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-2.5 rounded-xl bg-gradient-to-r from-[#7B263A] to-[#581827] text-white text-xs font-bold uppercase tracking-wider shadow hover:opacity-95 transition flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
-          >
-            <span>{loading ? "Authenticating..." : "Sign In to Dashboard"}</span>
-            <ArrowRight className="w-3.5 h-3.5" />
-          </button>
+          <div className="pt-2">
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full h-12 rounded-xl bg-gradient-to-r from-[#7B263A] to-[#581827] text-white text-base font-semibold shadow-md hover:opacity-95 active:scale-[0.99] transition flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+            >
+              <span>{loading ? "Authenticating..." : "Sign In to Console"}</span>
+              <ArrowRight className="w-4 h-4" />
+            </button>
+          </div>
         </form>
 
-        <div className="mt-6 pt-4 border-t border-[#C5A05A]/20 text-center">
-          <p className="text-[11px] text-[#49382D]/70">
-            For initial setup, create your administrator user in the Supabase Authentication dashboard.
+        <div className="mt-8 pt-5 border-t border-stone-100 flex flex-col items-center gap-3">
+          <Link
+            href="/"
+            className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-stone-600 hover:text-[#7B263A] transition"
+          >
+            <ArrowLeft className="w-3.5 h-3.5" />
+            <span>Return to Wedding Invitation</span>
+          </Link>
+          <p className="text-xs text-stone-400 text-center">
+            Secured organizer access with Supabase authentication
           </p>
         </div>
       </div>
