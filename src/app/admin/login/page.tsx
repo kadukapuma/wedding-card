@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { LotusMotif, CornerFiligree } from "@/components/invitation/TraditionalMotifs";
 import { Lock, Mail, ArrowRight } from "lucide-react";
 
@@ -17,6 +18,12 @@ export default function AdminLoginPage() {
     e.preventDefault();
     setLoading(true);
     setErrorMessage("");
+
+    if (!isSupabaseConfigured()) {
+      setErrorMessage("Supabase is not configured, so sign-in is unavailable.");
+      setLoading(false);
+      return;
+    }
 
     try {
       const supabase = createClient();

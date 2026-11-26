@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { AdminNav } from "@/components/admin/AdminNav";
 import { createClient } from "@/lib/supabase/client";
 import { WeddingSettings } from "@/types/wedding";
-import { Save, CheckCircle2, Clock, MapPin, Heart } from "lucide-react";
+import { Save, CheckCircle2, Clock, MapPin, Heart, AlertCircle } from "lucide-react";
 
 export default function AdminSettingsPage() {
   const [settings, setSettings] = useState<WeddingSettings>({
@@ -28,17 +28,25 @@ export default function AdminSettingsPage() {
 
   const [saving, setSaving] = useState(false);
   const [savedSuccess, setSavedSuccess] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [loadedId, setLoadedId] = useState<string | null>(null);
 
   useEffect(() => {
     async function loadSettings() {
       try {
         const supabase = createClient();
-        const { data } = await supabase.from("wedding_settings").select("*").limit(1).maybeSingle();
-        if (data) {
+        const { data, error } = await supabase.from("wedding_settings").select("*").limit(1).maybeSingle();
+        if (error) {
+          setErrorMessage(`Could not load settings: ${error.message}`);
+        } else if (data) {
           setSettings(data as WeddingSettings);
+          setLoadedId(data.id);
+        } else {
+          setErrorMessage("No settings found in the database. Run 001_initial_schema.sql in Supabase.");
         }
       } catch (err) {
         console.warn("Using sample wedding settings:", err);
+        setErrorMessage("Could not load settings. Check your connection and refresh.");
       }
     }
     loadSettings();
@@ -48,17 +56,34 @@ export default function AdminSettingsPage() {
     e.preventDefault();
     setSaving(true);
     setSavedSuccess(false);
+    setErrorMessage("");
 
     try {
-      const supabase = createClient();
-      await supabase.from("wedding_settings").upsert(settings);
-    } catch {
-      // Local fallback
-    }
+      if (!loadedId) {
+        throw new Error("settings were not loaded from the database. Refresh the page and try again.");
+      }
+      const changes: Partial<WeddingSettings> = { ...settings };
+      delete changes.id;
+      delete changes.created_at;
+      delete changes.updated_at;
 
-    setSavedSuccess(true);
-    setSaving(false);
-    setTimeout(() => setSavedSuccess(false), 3000);
+      const supabase = createClient();
+      // select() returns the changed rows: none means security rules blocked the update
+      const { data, error } = await supabase
+        .from("wedding_settings")
+        .update(changes)
+        .eq("id", loadedId)
+        .select("id");
+      if (error) throw new Error(error.message);
+      if (!data?.length) throw new Error("nothing was updated. Sign in again and retry.");
+
+      setSavedSuccess(true);
+      setTimeout(() => setSavedSuccess(false), 3000);
+    } catch (err) {
+      setErrorMessage(`Could not save settings: ${(err as Error).message}`);
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -210,11 +235,10 @@ export default function AdminSettingsPage() {
               <div>
                 <label className="block font-bold text-[#38251F] mb-1">Wedding Date</label>
                 <input
-                  type="text"
+                  type="date"
                   required
                   value={settings.wedding_date}
                   onChange={(e) => setSettings({ ...settings, wedding_date: e.target.value })}
-                  placeholder="Sunday, 18th October 2026"
                   className="w-full p-2.5 bg-[#FFF9EF] border border-[#C5A05A]/40 rounded-lg focus:outline-none"
                 />
               </div>
@@ -327,6 +351,13 @@ export default function AdminSettingsPage() {
               </div>
             </div>
           </div>
+
+          {errorMessage && (
+            <div role="alert" className="p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-xs flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 shrink-0" />
+              <span>{errorMessage}</span>
+            </div>
+          )}
 
           <div className="flex justify-end pt-2">
             <button

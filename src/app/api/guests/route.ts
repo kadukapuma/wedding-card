@@ -1,20 +1,32 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getGuests, createGuest, deleteGuest } from "@/lib/data/guestStore";
 import { generateSecureToken } from "@/lib/validation/guest";
+import { denyUnlessAdmin } from "@/lib/supabase/auth";
 import { Guest } from "@/types/wedding";
+
+function errorResponse(err: unknown, fallback: string) {
+  const message = err instanceof Error ? err.message : fallback;
+  return NextResponse.json({ error: message }, { status: 500 });
+}
 
 export async function GET() {
   try {
+    const denied = await denyUnlessAdmin();
+    if (denied) return denied;
+
     const guests = await getGuests();
     return NextResponse.json({ guests });
   } catch (err) {
     console.error("GET /api/guests error:", err);
-    return NextResponse.json({ error: "Failed to fetch guests" }, { status: 500 });
+    return errorResponse(err, "Failed to fetch guests");
   }
 }
 
 export async function POST(req: NextRequest) {
   try {
+    const denied = await denyUnlessAdmin();
+    if (denied) return denied;
+
     const body = await req.json();
     const { guest_name, family_name, phone, allowed_guests, invitation_token } = body;
 
@@ -35,16 +47,19 @@ export async function POST(req: NextRequest) {
       created_at: new Date().toISOString(),
     };
 
-    const result = await createGuest(newGuest);
-    return NextResponse.json({ success: true, guest: result.guest });
+    const guest = await createGuest(newGuest);
+    return NextResponse.json({ success: true, guest });
   } catch (err) {
     console.error("POST /api/guests error:", err);
-    return NextResponse.json({ error: "Failed to create guest" }, { status: 500 });
+    return errorResponse(err, "Failed to create guest");
   }
 }
 
 export async function DELETE(req: NextRequest) {
   try {
+    const denied = await denyUnlessAdmin();
+    if (denied) return denied;
+
     const { searchParams } = new URL(req.url);
     const id = searchParams.get("id");
 
@@ -56,6 +71,6 @@ export async function DELETE(req: NextRequest) {
     return NextResponse.json({ success: true });
   } catch (err) {
     console.error("DELETE /api/guests error:", err);
-    return NextResponse.json({ error: "Failed to delete guest" }, { status: 500 });
+    return errorResponse(err, "Failed to delete guest");
   }
 }

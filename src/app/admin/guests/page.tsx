@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { AdminNav } from "@/components/admin/AdminNav";
 import { Guest } from "@/types/wedding";
 import { generateWhatsAppLink, generateInvitationUrl } from "@/lib/whatsapp/share";
@@ -22,7 +23,9 @@ import {
 import Papa from "papaparse";
 
 export default function AdminGuestsPage() {
+  const router = useRouter();
   const [guests, setGuests] = useState<Guest[]>([]);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [filterRsvp, setFilterRsvp] = useState("all");
@@ -46,12 +49,20 @@ export default function AdminGuestsPage() {
     try {
       setLoading(true);
       const res = await fetch("/api/guests");
+      if (res.status === 401) {
+        router.replace("/admin/login");
+        return;
+      }
       const data = await res.json();
       if (data.guests) {
         setGuests(data.guests);
+        setLoadError(null);
+      } else {
+        setLoadError(data.error || "Failed to load guests");
       }
     } catch (err) {
       console.warn("Failed to fetch guests from API:", err);
+      setLoadError("Failed to load guests. Check your connection and refresh.");
     } finally {
       setLoading(false);
     }
@@ -118,9 +129,13 @@ export default function AdminGuestsPage() {
       if (res.ok) {
         setGuests(guests.filter((g) => g.id !== id));
         showToast("Invitation deleted.");
+      } else {
+        const data = await res.json().catch(() => ({}));
+        alert(data.error || "Failed to delete invitation");
       }
     } catch (err) {
       console.error("Failed to delete guest:", err);
+      alert("Failed to delete invitation. Please try again.");
     }
   };
 
@@ -141,10 +156,14 @@ export default function AdminGuestsPage() {
     if (csvPreview.length === 0) return;
     setImporting(true);
 
+    let imported = 0;
+    const failedRows: typeof csvPreview = [];
+    let firstError = "";
+
     try {
       for (const row of csvPreview) {
         if (!row.guest_name) continue;
-        await fetch("/api/guests", {
+        const res = await fetch("/api/guests", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -154,14 +173,27 @@ export default function AdminGuestsPage() {
             allowed_guests: Number(row.allowed_guests) || 1,
           }),
         });
+        if (res.ok) {
+          imported++;
+        } else {
+          const data = await res.json().catch(() => ({}));
+          firstError ||= data.error || `Request failed (${res.status})`;
+          failedRows.push(row);
+        }
       }
       await fetchGuests();
-      setCsvPreview([]);
-      setShowImportModal(false);
-      showToast(`Successfully imported ${csvPreview.length} guests!`);
+      // Only the failed rows stay in the preview, so a retry doesn't duplicate guests
+      setCsvPreview(failedRows);
+      if (failedRows.length === 0) {
+        setShowImportModal(false);
+        showToast(`Successfully imported ${imported} guests!`);
+      } else {
+        alert(`Imported ${imported} guests. ${failedRows.length} failed.\n\n${firstError}`);
+      }
     } catch (err) {
       console.error("CSV import error:", err);
-      alert("An error occurred during CSV import.");
+      alert(`The import was interrupted after ${imported} guests. Check the list before retrying.`);
+      await fetchGuests();
     } finally {
       setImporting(false);
     }
@@ -216,6 +248,13 @@ export default function AdminGuestsPage() {
             </button>
           </div>
         </div>
+
+        {loadError && (
+          <div role="alert" className="mb-6 p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-xs flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 shrink-0" />
+            <span>{loadError}</span>
+          </div>
+        )}
 
         {/* Search & Filters */}
         <div className="flex flex-col sm:flex-row gap-3 mb-6 bg-white p-3 rounded-xl border border-[#C5A05A]/30">

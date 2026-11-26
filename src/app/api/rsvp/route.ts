@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
         ? Math.min(Math.max(1, Number(attendingCount) || 1), guest.allowed_guests)
         : 0;
 
-    // 3. Update RSVP status in storage (local + Supabase)
+    // 3. Update RSVP status in storage
     await updateGuestRsvp(token, response, safeCount, message);
 
     return NextResponse.json({ success: true });

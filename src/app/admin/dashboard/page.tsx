@@ -2,34 +2,40 @@
 
 import React, { useState, useEffect } from "react";
 import { AdminNav } from "@/components/admin/AdminNav";
-import { createClient } from "@/lib/supabase/client";
-import { Users, Eye, CheckCircle2, XCircle, Clock, Send, Sparkles } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Guest } from "@/types/wedding";
+import { Users, Eye, CheckCircle2, XCircle, Clock, Send, Sparkles, AlertCircle } from "lucide-react";
 import Link from "next/link";
 
 export default function AdminDashboardPage() {
+  const router = useRouter();
   const [stats, setStats] = useState({
-    totalGuests: 6,
-    totalInvitedPeople: 14,
-    viewedCount: 4,
-    acceptedCount: 3,
-    declinedCount: 1,
-    pendingCount: 2,
+    totalGuests: 0,
+    totalInvitedPeople: 0,
+    viewedCount: 0,
+    acceptedCount: 0,
+    declinedCount: 0,
+    pendingCount: 0,
   });
-  const [loading, setLoading] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   useEffect(() => {
     async function loadStats() {
       try {
         const res = await fetch("/api/guests");
+        if (res.status === 401) {
+          router.replace("/admin/login");
+          return;
+        }
         const json = await res.json();
-        const guests = json.guests;
+        const guests: Guest[] | undefined = json.guests;
 
-        if (guests && guests.length > 0) {
-          const viewed = guests.filter((g: any) => g.viewed_at).length;
-          const accepted = guests.filter((g: any) => g.rsvp_status === "accepted").length;
-          const declined = guests.filter((g: any) => g.rsvp_status === "declined").length;
-          const pending = guests.filter((g: any) => g.rsvp_status === "pending").length;
-          const totalPeople = guests.reduce((sum: number, g: any) => sum + (g.allowed_guests || 1), 0);
+        if (guests) {
+          const viewed = guests.filter((g) => g.viewed_at).length;
+          const accepted = guests.filter((g) => g.rsvp_status === "accepted").length;
+          const declined = guests.filter((g) => g.rsvp_status === "declined").length;
+          const pending = guests.filter((g) => g.rsvp_status === "pending").length;
+          const totalPeople = guests.reduce((sum, g) => sum + (g.allowed_guests || 1), 0);
 
           setStats({
             totalGuests: guests.length,
@@ -39,13 +45,16 @@ export default function AdminDashboardPage() {
             declinedCount: declined,
             pendingCount: pending,
           });
+        } else {
+          setLoadError(json.error || "Failed to load guests");
         }
       } catch (err) {
-        console.warn("Using sample dashboard statistics:", err);
+        console.warn("Failed to load dashboard statistics:", err);
+        setLoadError("Failed to load guests. Check your connection and refresh.");
       }
     }
     loadStats();
-  }, []);
+  }, [router]);
 
   const statCards = [
     {
@@ -115,6 +124,13 @@ export default function AdminDashboardPage() {
             </Link>
           </div>
         </div>
+
+        {loadError && (
+          <div role="alert" className="mb-6 p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-xs flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 shrink-0" />
+            <span>{loadError}</span>
+          </div>
+        )}
 
         {/* Stats Grid */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 mb-8">
