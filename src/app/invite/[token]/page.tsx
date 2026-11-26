@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import { createAdminClient } from "@/lib/supabase/server";
+import { getWeddingSettings } from "@/lib/data/weddingSettings";
 import { AnimatedInvitationView } from "@/components/invitation/AnimatedInvitationView";
 import { WeddingSettings } from "@/types/wedding";
 import { LotusMotif } from "@/components/invitation/TraditionalMotifs";
@@ -43,11 +43,14 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     // metadata fallback
   }
 
+  const wedding = (await getWeddingSettings()) ?? DEFAULT_WEDDING;
+  const title = `Wedding Invitation – ${wedding.bride_name} & ${wedding.groom_name}`;
+
   return {
-    title: `Wedding Invitation – Sanduni & Kavinda`,
+    title,
     description: `A personalized wedding invitation prepared for ${guestName}.`,
     openGraph: {
-      title: `Wedding Invitation – Sanduni & Kavinda`,
+      title,
       description: `A special traditional Sri Lankan wedding invitation prepared for ${guestName}.`,
       type: "website",
     },
@@ -56,7 +59,6 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function InvitePage({ params }: PageProps) {
   const { token } = await params;
-  const supabase = createAdminClient();
 
   let guestData: {
     id: string;
@@ -71,26 +73,6 @@ export default async function InvitePage({ params }: PageProps) {
     attending_count: number;
     message?: string;
   } | null = null;
-
-  let weddingSettings = DEFAULT_WEDDING;
-
-  try {
-    // 1. Fetch wedding settings from Supabase if configured
-    const { data: settings } = await supabase
-      .from("wedding_settings")
-      .select("*")
-      .limit(1)
-      .maybeSingle();
-
-    if (settings) {
-      weddingSettings = {
-        ...DEFAULT_WEDDING,
-        ...settings,
-      };
-    }
-  } catch (err) {
-    console.warn("Using default wedding settings:", err);
-  }
 
   // 2. Fetch guest record securely using dual-mode store (Supabase + local fallback)
   try {
@@ -144,7 +126,7 @@ export default async function InvitePage({ params }: PageProps) {
   return (
     <AnimatedInvitationView
       guest={guestData}
-      wedding={weddingSettings}
+      wedding={(await getWeddingSettings()) ?? DEFAULT_WEDDING}
       token={token}
       existingRsvp={existingRsvp}
     />

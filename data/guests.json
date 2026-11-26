@@ -1,0 +1,35 @@
+[
+  {
+    "id": "1",
+    "guest_name": "Mr. Kasun Perera & Family",
+    "family_name": "Perera Family",
+    "phone": "94771234567",
+    "allowed_guests": 3,
+    "invitation_token": "a8k29xyz",
+    "rsvp_status": "accepted",
+    "viewed_at": "2026-11-20T10:00:00Z",
+    "created_at": "2026-11-26T08:08:24.002Z"
+  },
+  {
+    "id": "2",
+    "guest_name": "Mr. Nimal Silva & Family",
+    "family_name": "Silva Family",
+    "phone": "94772345678",
+    "allowed_guests": 2,
+    "invitation_token": "b9c34kpm",
+    "rsvp_status": "pending",
+    "viewed_at": null,
+    "created_at": "2026-11-26T08:08:24.002Z"
+  },
+  {
+    "id": "3",
+    "guest_name": "Dr. Amal Fernando",
+    "family_name": "Fernando Family",
+    "phone": "94773456789",
+    "allowed_guests": 2,
+    "invitation_token": "c4d78wqr",
+    "rsvp_status": "declined",
+    "viewed_at": "2026-11-21T14:30:00Z",
+    "created_at": "2026-11-26T08:08:24.002Z"
+  }
+]

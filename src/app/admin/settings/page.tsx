@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { AdminNav } from "@/components/admin/AdminNav";
 import { createClient } from "@/lib/supabase/client";
+import { isOpenLocalMode } from "@/lib/supabase/config";
 import { WeddingSettings } from "@/types/wedding";
 import {
   Save,
@@ -49,10 +50,20 @@ export default function AdminSettingsPage() {
   useEffect(() => {
     async function loadSettings() {
       try {
+        if (isOpenLocalMode()) {
+          const response = await fetch("/api/wedding-settings", { cache: "no-store" });
+          if (!response.ok) throw new Error("Could not load local settings.");
+          const data = await response.json();
+          if (data) setSettings(data);
+          setLoadedId("local-wedding");
+          return;
+        }
         const supabase = createClient();
         const { data, error } = await supabase
           .from("wedding_settings")
           .select("*")
+          .order("updated_at", { ascending: false })
+          .order("id")
           .limit(1)
           .maybeSingle();
         if (error) {
@@ -79,21 +90,30 @@ export default function AdminSettingsPage() {
 
     try {
       if (!loadedId) {
-        throw new Error("Settings were not loaded from the database. Refresh the page and try again.");
+        throw new Error("Settings are still unavailable. Refresh the page and try again.");
       }
       const changes: Partial<WeddingSettings> = { ...settings };
       delete changes.id;
       delete changes.created_at;
       delete changes.updated_at;
 
-      const supabase = createClient();
-      const { data, error } = await supabase
-        .from("wedding_settings")
-        .update(changes)
-        .eq("id", loadedId)
-        .select("id");
-      if (error) throw new Error(error.message);
-      if (!data?.length) throw new Error("Nothing was updated. Sign in again and retry.");
+      if (isOpenLocalMode()) {
+        const response = await fetch("/api/wedding-settings", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(changes),
+        });
+        if (!response.ok) throw new Error("Could not save local wedding details.");
+      } else {
+        const supabase = createClient();
+        const { data, error } = await supabase
+          .from("wedding_settings")
+          .update(changes)
+          .eq("id", loadedId)
+          .select("id");
+        if (error) throw new Error(error.message);
+        if (!data?.length) throw new Error("Nothing was updated. Sign in again and retry.");
+      }
 
       setSavedSuccess(true);
       setTimeout(() => setSavedSuccess(false), 3500);

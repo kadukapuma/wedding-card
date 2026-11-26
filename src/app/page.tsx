@@ -1,8 +1,8 @@
-"use client";
-
-import React, { useState } from "react";
 import { AnimatedInvitationView } from "@/components/invitation/AnimatedInvitationView";
 import { WeddingSettings } from "@/types/wedding";
+import { getWeddingSettings } from "@/lib/data/weddingSettings";
+
+export const dynamic = "force-dynamic";
 
 const DEMO_WEDDING: WeddingSettings = {
   id: "demo-wedding",
@@ -30,12 +30,14 @@ const DEMO_GUEST = {
   rsvp_status: "pending",
 };
 
-export default function HomePage() {
+export default async function HomePage() {
+  const wedding = (await getWeddingSettings()) ?? DEMO_WEDDING;
+
   return (
     <main>
       <AnimatedInvitationView
         guest={DEMO_GUEST}
-        wedding={DEMO_WEDDING}
+        wedding={wedding}
       />
     </main>
   );
